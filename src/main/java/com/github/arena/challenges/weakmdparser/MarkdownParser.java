@@ -15,6 +15,7 @@ public class MarkdownParser {
             if (!(isHeader(currentLine) || isList(currentLine))) {
                 currentLine = parseParagraph(currentLine);
             }
+            currentLine = parseFontStyles(currentLine);
 
             if (isList(currentLine) && !activeList) {
                 activeList = true;
@@ -58,15 +59,13 @@ public class MarkdownParser {
     public String parseList(String markdown) {
         if (markdown.startsWith("*")) {
             String skipAsterisk = markdown.substring(2);
-            String listItemString = parseFontStyles(skipAsterisk);
-            return "<li>" + listItemString + "</li>";
+            return "<li>" + skipAsterisk + "</li>";
         }
-
         return markdown;
     }
 
     public String parseParagraph(String markdown) {
-        return "<p>" + parseFontStyles(markdown) + "</p>";
+        return "<p>" + markdown + "</p>";
     }
 
     public String parseFontStyles(String markdown) {
