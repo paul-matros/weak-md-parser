@@ -5,7 +5,7 @@ public class MarkdownParser {
 
     String parse(String markdown) {
         String[] lines = markdown.split("\n");
-        String result = "";
+        StringBuilder result = new StringBuilder();
 
 
         for (String currentLine : lines) {
@@ -17,9 +17,9 @@ public class MarkdownParser {
                 currentLine = parseParagraph(currentLine);
             }
             currentLine = parseFontStyles(currentLine);
-            result = result + currentLine;
+            result.append(currentLine);
         }
-        return result;
+        return result.toString();
     }
 
     private String parseListContainer(String currentLine) {
