@@ -1,25 +1,28 @@
 package com.github.arena.challenges.weakmdparser;
 
 public class MarkdownParser {
-
+    boolean activeList = false;
     String parse(String markdown) {
         String[] lines = markdown.split("\n");
         String result = "";
-        boolean activeList = false;
 
-        for (int i = 0; i < lines.length; i++) {
 
-            String theLine = ph(lines[i]);
+        for (String currentLine:lines) {
+
+            String theLine = ph(currentLine);
 
             if (theLine == null) {
-                theLine = li(lines[i]);
+                theLine = li(currentLine);
             }
 
             if (theLine == null) {
-                theLine = p(lines[i]);
+                theLine = p(currentLine);
             }
 
-            if (theLine.matches("(<li>).*") && !theLine.matches("(<h).*") && !theLine.matches("(<p>).*") && !activeList) {
+            if (theLine.matches("(<li>).*")
+                 /*   && !theLine.matches("(<h).*")
+                    && !theLine.matches("(<p>).*")*/
+                    && !activeList) {
                 activeList = true;
                 result = result + "<ul>";
                 result = result + theLine;
@@ -56,7 +59,7 @@ public class MarkdownParser {
     public String li(String markdown) {
         if (markdown.startsWith("*")) {
             String skipAsterisk = markdown.substring(2);
-            String listItemString = parseSomeSymbols(skipAsterisk);
+            String listItemString = parseFontStyles(skipAsterisk);
             return "<li>" + listItemString + "</li>";
         }
 
@@ -64,17 +67,21 @@ public class MarkdownParser {
     }
 
     public String p(String markdown) {
-        return "<p>" + parseSomeSymbols(markdown) + "</p>";
+        return "<p>" + parseFontStyles(markdown) + "</p>";
     }
 
-    public String parseSomeSymbols(String markdown) {
-
+    public String parseFontStyles(String markdown) {
+        String result = parseBold(markdown);
+        return parseItalic(result);
+    }
+    private String parseBold(String markdown){
         String lookingFor = "__(.+)__";
         String update = "<strong>$1</strong>";
-        String workingOn = markdown.replaceAll(lookingFor, update);
-
-        lookingFor = "_(.+)_";
-        update = "<em>$1</em>";
-        return workingOn.replaceAll(lookingFor, update);
+        return markdown.replaceAll(lookingFor, update);
+    }
+    private String parseItalic(String markdown){
+        String lookingFor = "_(.+)_";
+        String update = "<em>$1</em>";
+        return markdown.replaceAll(lookingFor, update);
     }
 }
