@@ -11,22 +11,19 @@ public class MarkdownParser {
 
             currentLine = parseHeader(currentLine);
             currentLine = parseList(currentLine);
-            if (
-                    !(currentLine.matches("(<li>).*"))
-                            &&
-                            !(currentLine.matches("(<h).*"))
+            if (!(isHeader(currentLine) || isList(currentLine))
             )
             currentLine = parseParagraph(currentLine);
 
 
-            if (currentLine.matches("(<li>).*")
+            if (isList(currentLine)
                  /*   && !theLine.matches("(<h).*")
                     && !theLine.matches("(<p>).*")*/
                     && !activeList) {
                 activeList = true;
                 result = result + "<ul>";
                 result = result + currentLine;
-            } else if (!currentLine.matches("(<li>).*") && activeList) {
+            } else if (!isList(currentLine) && activeList) {
                 activeList = false;
                 result = result + "</ul>";
                 result = result + currentLine;
@@ -40,6 +37,14 @@ public class MarkdownParser {
         }
 
         return result;
+    }
+
+    private boolean isList(String markdown){
+        return markdown.matches("(<li>).*");
+    }
+
+    private boolean isHeader(String markdown){
+        return markdown.matches("(<h).*");
     }
 
     protected String parseHeader(String markdown) {
