@@ -53,7 +53,7 @@ public class MarkdownParser {
             return markdown;
         }
 
-        return "<h" + Integer.toString(count) + ">" + markdown.substring(count + 1) + "</h" + Integer.toString(count) + ">";
+        return "<h" + count + ">" + markdown.substring(count + 1) + "</h" + count + ">";
     }
 
     public String parseList(String markdown) {
