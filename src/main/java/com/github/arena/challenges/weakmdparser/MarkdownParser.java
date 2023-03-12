@@ -6,31 +6,32 @@ public class MarkdownParser {
     String parse(String markdown) {
         String[] lines = markdown.split("\n");
         StringBuilder result = new StringBuilder();
-
-
         for (String currentLine : lines) {
-
-            currentLine = parseHeader(currentLine);
-            currentLine = parseList(currentLine);
-            currentLine = parseListContainer(currentLine);
-            if (!(isHeader(currentLine) || isList(currentLine))) {
-                currentLine = parseParagraph(currentLine);
-            }
-            currentLine = parseFontStyles(currentLine);
-            result.append(currentLine);
+            result.append(parseLine(currentLine));
         }
         return result.toString();
     }
 
+    private String parseLine(String currentLine) {
+        currentLine = parseHeader(currentLine);
+        currentLine = parseList(currentLine);
+        currentLine = parseListContainer(currentLine);
+        if (!(isHeader(currentLine) || isList(currentLine))) {
+            currentLine = parseParagraph(currentLine);
+        }
+        return currentLine = parseFontStyles(currentLine);
+
+    }
+
     private String parseListContainer(String currentLine) {
-        if(!activeList){
-            if (isList(currentLine)){
+        if (!activeList) {
+            if (isList(currentLine)) {
                 activeList = true;
-                return "<ul>"+currentLine;
+                return "<ul>" + currentLine;
             }
-        }else{
-                activeList = false;
-                return currentLine + "</ul>";
+        } else {
+            activeList = false;
+            return currentLine + "</ul>";
         }
         return currentLine;
     }
