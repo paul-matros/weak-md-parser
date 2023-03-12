@@ -2,34 +2,28 @@ package com.github.arena.challenges.weakmdparser;
 
 public class MarkdownParser {
     boolean activeList = false;
+
     String parse(String markdown) {
         String[] lines = markdown.split("\n");
         String result = "";
 
 
-        for (String currentLine:lines) {
+        for (String currentLine : lines) {
 
             currentLine = parseHeader(currentLine);
             currentLine = parseList(currentLine);
-            if (!(isHeader(currentLine) || isList(currentLine))
-            )
-            currentLine = parseParagraph(currentLine);
+            if (!(isHeader(currentLine) || isList(currentLine))) {
+                currentLine = parseParagraph(currentLine);
+            }
 
-
-            if (isList(currentLine)
-                 /*   && !theLine.matches("(<h).*")
-                    && !theLine.matches("(<p>).*")*/
-                    && !activeList) {
+            if (isList(currentLine) && !activeList) {
                 activeList = true;
-                result = result + "<ul>";
-                result = result + currentLine;
-            } else if (!isList(currentLine) && activeList) {
+                result = result + "<ul>" ;}
+            if (!isList(currentLine) && activeList) {
                 activeList = false;
                 result = result + "</ul>";
-                result = result + currentLine;
-            } else {
-                result = result + currentLine;
             }
+            result = result + currentLine;
         }
 
         if (activeList) {
@@ -39,11 +33,11 @@ public class MarkdownParser {
         return result;
     }
 
-    private boolean isList(String markdown){
+    private boolean isList(String markdown) {
         return markdown.matches("(<li>).*");
     }
 
-    private boolean isHeader(String markdown){
+    private boolean isHeader(String markdown) {
         return markdown.matches("(<h).*");
     }
 
@@ -79,12 +73,14 @@ public class MarkdownParser {
         String result = parseBold(markdown);
         return parseItalic(result);
     }
-    private String parseBold(String markdown){
+
+    private String parseBold(String markdown) {
         String lookingFor = "__(.+)__";
         String update = "<strong>$1</strong>";
         return markdown.replaceAll(lookingFor, update);
     }
-    private String parseItalic(String markdown){
+
+    private String parseItalic(String markdown) {
         String lookingFor = "_(.+)_";
         String update = "<em>$1</em>";
         return markdown.replaceAll(lookingFor, update);
