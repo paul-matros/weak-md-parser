@@ -9,29 +9,29 @@ public class MarkdownParser {
 
         for (String currentLine:lines) {
 
-            String theLine = parseHeader(currentLine);
+            currentLine = parseHeader(currentLine);
+            currentLine = parseList(currentLine);
+            if (
+                    !(currentLine.matches("(<li>).*"))
+                            &&
+                            !(currentLine.matches("(<h).*"))
+            )
+            currentLine = parseParagraph(currentLine);
 
-            if (theLine == null) {
-                theLine = parseLine(currentLine);
-            }
 
-            if (theLine == null) {
-                theLine = parseParagraph(currentLine);
-            }
-
-            if (theLine.matches("(<li>).*")
+            if (currentLine.matches("(<li>).*")
                  /*   && !theLine.matches("(<h).*")
                     && !theLine.matches("(<p>).*")*/
                     && !activeList) {
                 activeList = true;
                 result = result + "<ul>";
-                result = result + theLine;
-            } else if (!theLine.matches("(<li>).*") && activeList) {
+                result = result + currentLine;
+            } else if (!currentLine.matches("(<li>).*") && activeList) {
                 activeList = false;
                 result = result + "</ul>";
-                result = result + theLine;
+                result = result + currentLine;
             } else {
-                result = result + theLine;
+                result = result + currentLine;
             }
         }
 
@@ -50,20 +50,20 @@ public class MarkdownParser {
         }
 
         if (count == 0) {
-            return null;
+            return markdown;
         }
 
         return "<h" + Integer.toString(count) + ">" + markdown.substring(count + 1) + "</h" + Integer.toString(count) + ">";
     }
 
-    public String parseLine(String markdown) {
+    public String parseList(String markdown) {
         if (markdown.startsWith("*")) {
             String skipAsterisk = markdown.substring(2);
             String listItemString = parseFontStyles(skipAsterisk);
             return "<li>" + listItemString + "</li>";
         }
 
-        return null;
+        return markdown;
     }
 
     public String parseParagraph(String markdown) {
