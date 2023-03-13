@@ -15,9 +15,7 @@ public class MarkdownParser {
     private String parseLine(String currentLine) {
         currentLine = parseHeader(currentLine);
         currentLine = parseList(currentLine);
-        if (!(isHeader(currentLine) || isList(currentLine))) {
-            currentLine = parseParagraph(currentLine);
-        }
+        currentLine = parseParagraph(currentLine);
         currentLine = parseListContainer(currentLine);
         return parseFontStyles(currentLine);
     }
@@ -58,7 +56,9 @@ public class MarkdownParser {
     }
 
     private String parseParagraph(String markdown) {
-        return "<p>" + markdown + "</p>";
+        if (!(isHeader(markdown) || isList(markdown)))
+            return "<p>" + markdown + "</p>";
+        return markdown;
     }
 
     private String parseFontStyles(String markdown) {
