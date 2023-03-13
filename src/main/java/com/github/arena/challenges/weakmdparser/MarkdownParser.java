@@ -1,7 +1,7 @@
 package com.github.arena.challenges.weakmdparser;
 
 public class MarkdownParser {
-    boolean activeList = false;
+    private boolean activeList = false;
 
     String parse(String markdown) {
         String[] lines = markdown.split("\n");
@@ -35,15 +35,7 @@ public class MarkdownParser {
         return currentLine;
     }
 
-    private boolean isList(String markdown) {
-        return markdown.matches("(<li>).*")/* || markdown.matches("(<ul>).*")*/;
-    }
-
-    private boolean isHeader(String markdown) {
-        return markdown.matches("(<h).*");
-    }
-
-    protected String parseHeader(String markdown) {
+    private String parseHeader(String markdown) {
         int count = 0;
 
         for (int i = 0; i < markdown.length() && markdown.charAt(i) == '#'; i++) {
@@ -57,7 +49,7 @@ public class MarkdownParser {
         return "<h" + count + ">" + markdown.substring(count + 1) + "</h" + count + ">";
     }
 
-    public String parseList(String markdown) {
+    private String parseList(String markdown) {
         if (markdown.startsWith("*")) {
             String skipAsterisk = markdown.substring(2);
             return "<li>" + skipAsterisk + "</li>";
@@ -65,11 +57,11 @@ public class MarkdownParser {
         return markdown;
     }
 
-    public String parseParagraph(String markdown) {
+    private String parseParagraph(String markdown) {
         return "<p>" + markdown + "</p>";
     }
 
-    public String parseFontStyles(String markdown) {
+    private String parseFontStyles(String markdown) {
         String result = parseBold(markdown);
         return parseItalic(result);
     }
@@ -84,5 +76,13 @@ public class MarkdownParser {
         String lookingFor = "_(.+)_";
         String update = "<em>$1</em>";
         return markdown.replaceAll(lookingFor, update);
+    }
+
+    private boolean isList(String markdown) {
+        return markdown.matches("(<li>).*");
+    }
+
+    private boolean isHeader(String markdown) {
+        return markdown.matches("(<h).*");
     }
 }
