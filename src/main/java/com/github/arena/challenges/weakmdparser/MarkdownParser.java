@@ -19,8 +19,7 @@ public class MarkdownParser {
             currentLine = parseParagraph(currentLine);
         }
         currentLine = parseListContainer(currentLine);
-        return currentLine = parseFontStyles(currentLine);
-
+        return parseFontStyles(currentLine);
     }
 
     private String parseListContainer(String currentLine) {
