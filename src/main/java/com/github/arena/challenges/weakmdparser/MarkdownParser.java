@@ -73,15 +73,15 @@ public class MarkdownParser {
     }
 
     private String parseBold(String parsedLine) {
-        String lookingFor = "__(.+)__";
-        String update = "<strong>$1</strong>";
-        return parsedLine.replaceAll(lookingFor, update);
+        String boldFontRegEx = "__(.+)__";
+        String taggedWithStrong = "<strong>$1</strong>";
+        return parsedLine.replaceAll(boldFontRegEx, taggedWithStrong);
     }
 
     private String parseItalic(String parsedLine) {
-        String lookingFor = "_(.+)_";
-        String update = "<em>$1</em>";
-        return parsedLine.replaceAll(lookingFor, update);
+        String italicFontRegEx = "_(.+)_";
+        String taggedWithEm = "<em>$1</em>";
+        return parsedLine.replaceAll(italicFontRegEx, taggedWithEm);
     }
 
     private boolean isList(String parsedLine) {
