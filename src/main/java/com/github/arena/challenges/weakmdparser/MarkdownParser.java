@@ -15,10 +15,10 @@ public class MarkdownParser {
     private String parseLine(String currentLine) {
         currentLine = parseHeader(currentLine);
         currentLine = parseList(currentLine);
-        currentLine = parseListContainer(currentLine);
         if (!(isHeader(currentLine) || isList(currentLine))) {
             currentLine = parseParagraph(currentLine);
         }
+        currentLine = parseListContainer(currentLine);
         return currentLine = parseFontStyles(currentLine);
 
     }
@@ -37,7 +37,7 @@ public class MarkdownParser {
     }
 
     private boolean isList(String markdown) {
-        return markdown.matches("(<li>).*") || markdown.matches("(<ul>).*");
+        return markdown.matches("(<li>).*")/* || markdown.matches("(<ul>).*")*/;
     }
 
     private boolean isHeader(String markdown) {
