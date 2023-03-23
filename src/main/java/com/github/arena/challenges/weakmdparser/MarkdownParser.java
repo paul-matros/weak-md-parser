@@ -1,11 +1,5 @@
 package com.github.arena.challenges.weakmdparser;
-/**
- * short comment:
- * I was considering implementing chain of command or similar pattern,
- * but I came to conclusion that in this specific (simple) case
- * it will only add boiler code and won't improve readability.
- * Will implement it if asked.
- */
+
 public class MarkdownParser {
     private boolean activeList = false;
 
@@ -31,7 +25,8 @@ public class MarkdownParser {
         if (hashCount == 0) {
             return parsedLine;
         }
-        return "<h" + hashCount + ">" + parsedLine.substring(hashCount + 1) + "</h" + hashCount + ">";
+        String skipHashes = parsedLine.substring(hashCount + 1);
+        return "<h" + hashCount + ">" + skipHashes + "</h" + hashCount + ">";
     }
 
     private String parseList(String parsedLine) {
