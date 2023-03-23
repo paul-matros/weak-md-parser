@@ -61,8 +61,7 @@ public class MarkdownParser {
     }
 
     private String parseFontStyles(String parsedLine) {
-        String result = parseBold(parsedLine);
-        return parseItalic(result);
+        return parseItalic(parseBold(parsedLine));
     }
 
     private String parseBold(String parsedLine) {
