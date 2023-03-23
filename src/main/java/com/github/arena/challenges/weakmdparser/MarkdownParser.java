@@ -26,6 +26,27 @@ public class MarkdownParser {
         return parseFontStyles(parsedLine);
     }
 
+    private String parseHeader(String parsedLine) {
+        int hashCount = countLeadingChars(parsedLine, '#');
+        if (hashCount == 0) {
+            return parsedLine;
+        }
+        return "<h" + hashCount + ">" + parsedLine.substring(hashCount + 1) + "</h" + hashCount + ">";
+    }
+
+    private String parseList(String parsedLine) {
+        if (parsedLine.startsWith("*")) {
+            String skipAsterisk = parsedLine.substring(2);
+            return "<li>" + skipAsterisk + "</li>";
+        }
+        return parsedLine;
+    }
+    private String parseParagraph(String parsedLine) {
+        if (!(isHeader(parsedLine) || isList(parsedLine)))
+            return "<p>" + parsedLine + "</p>";
+        return parsedLine;
+    }
+
     private String parseListContainer(String parsedLine) {
         if (!activeList) {
             if (isList(parsedLine)) {
@@ -36,35 +57,6 @@ public class MarkdownParser {
             activeList = false;
             return parsedLine + "</ul>";
         }
-        return parsedLine;
-    }
-
-    private String parseHeader(String parsedLine) {
-        int hashCount = countLeadingChars(parsedLine, '#');
-        if (hashCount == 0) {
-            return parsedLine;
-        }
-        return "<h" + hashCount + ">" + parsedLine.substring(hashCount + 1) + "</h" + hashCount + ">";
-    }
-    private int countLeadingChars(String string, char character){
-        int count = 0;
-        for (int i = 0; i < string.length() && string.charAt(i) == character; i++) {
-            count++;
-        }
-        return count;
-    }
-
-    private String parseList(String parsedLine) {
-        if (parsedLine.startsWith("*")) {
-            String skipAsterisk = parsedLine.substring(2);
-            return "<li>" + skipAsterisk + "</li>";
-        }
-        return parsedLine;
-    }
-
-    private String parseParagraph(String parsedLine) {
-        if (!(isHeader(parsedLine) || isList(parsedLine)))
-            return "<p>" + parsedLine + "</p>";
         return parsedLine;
     }
 
@@ -83,6 +75,14 @@ public class MarkdownParser {
         String italicFontRegEx = "_(.+)_";
         String taggedWithEm = "<em>$1</em>";
         return parsedLine.replaceAll(italicFontRegEx, taggedWithEm);
+    }
+
+    private int countLeadingChars(String string, char character){
+        int count = 0;
+        for (int i = 0; i < string.length() && string.charAt(i) == character; i++) {
+            count++;
+        }
+        return count;
     }
 
     private boolean isList(String parsedLine) {
