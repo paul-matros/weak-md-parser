@@ -36,6 +36,7 @@ public class MarkdownParser {
         }
         return parsedLine;
     }
+
     private String parseParagraph(String parsedLine) {
         if (!(isHeader(parsedLine) || isList(parsedLine)))
             return "<p>" + parsedLine + "</p>";
@@ -71,7 +72,7 @@ public class MarkdownParser {
         return parsedLine.replaceAll(italicFontRegEx, taggedWithEm);
     }
 
-    private int countLeadingChars(String string, char character){
+    private int countLeadingChars(String string, char character) {
         int count = 0;
         for (int i = 0; i < string.length() && string.charAt(i) == character; i++) {
             count++;
