@@ -40,17 +40,18 @@ public class MarkdownParser {
     }
 
     private String parseHeader(String parsedLine) {
-        int count = 0;
-
-        for (int i = 0; i < parsedLine.length() && parsedLine.charAt(i) == '#'; i++) {
-            count++;
-        }
-
-        if (count == 0) {
+        int hashCount = countLeadingChars(parsedLine, '#');
+        if (hashCount == 0) {
             return parsedLine;
         }
-
-        return "<h" + count + ">" + parsedLine.substring(count + 1) + "</h" + count + ">";
+        return "<h" + hashCount + ">" + parsedLine.substring(hashCount + 1) + "</h" + hashCount + ">";
+    }
+    private int countLeadingChars(String string, char character){
+        int count = 0;
+        for (int i = 0; i < string.length() && string.charAt(i) == character; i++) {
+            count++;
+        }
+        return count;
     }
 
     private String parseList(String parsedLine) {
