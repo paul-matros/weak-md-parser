@@ -1,94 +1,127 @@
 package com.github.arena.challenges.weakmdparser;
+
 /**
- * short comment:
- * I was considering implementing chain of command or similar pattern,
- * but I came to conclusion that in this specific (simple) case
- * it will only add boiler code and won't improve readability.
- * Will implement it if asked.
+ I couldn't help myself but to try implement a design pattern. I am still thinking it wasn't worth my time
  */
 public class MarkdownParser {
     private boolean activeList = false;
 
     String parse(String parsedString) {
+
+        TagParser parser = new HeaderParser();
+        parser.setNextParser(new ListParser())
+                .setNextParser(new ParagraphParser())
+                .setNextParser(new UListParser())
+                .setNextParser(new FontStyleParser());
         String[] lines = parsedString.split("\n");
         StringBuilder result = new StringBuilder();
         for (String currentLine : lines) {
-            result.append(parseLine(currentLine));
+            result.append(parser.parse(currentLine));
         }
         return result.toString();
     }
 
-    private String parseLine(String parsedLine) {
-        parsedLine = parseHeader(parsedLine);
-        parsedLine = parseList(parsedLine);
-        parsedLine = parseParagraph(parsedLine);
-        parsedLine = parseListContainer(parsedLine);
-        return parseFontStyles(parsedLine);
-    }
+    public abstract class TagParser {
 
-    private String parseListContainer(String parsedLine) {
-        if (!activeList) {
-            if (isList(parsedLine)) {
-                activeList = true;
-                return "<ul>" + parsedLine;
+        private TagParser next;
+
+        public TagParser setNextParser(TagParser next) {
+            this.next = next;
+            return next;
+        }
+
+        public abstract String parse(String parsedLine);
+
+        protected String nextParser(String parsedLine) {
+            if (next == null) {
+                return parsedLine;
             }
-        } else {
-            activeList = false;
-            return parsedLine + "</ul>";
-        }
-        return parsedLine;
-    }
-
-    private String parseHeader(String parsedLine) {
-        int count = 0;
-
-        for (int i = 0; i < parsedLine.length() && parsedLine.charAt(i) == '#'; i++) {
-            count++;
+            return next.parse(parsedLine);
         }
 
-        if (count == 0) {
-            return parsedLine;
+    }
+    public class ListParser extends TagParser {
+
+        @Override
+        public String parse(String parsedLine) {
+            if (parsedLine.startsWith("*")) {
+                String skipAsterisk = parsedLine.substring(2);
+                parsedLine = "<li>" + skipAsterisk + "</li>";
+            }
+            return nextParser(parsedLine);
         }
 
-        return "<h" + count + ">" + parsedLine.substring(count + 1) + "</h" + count + ">";
     }
+    public class UListParser extends TagParser {
 
-    private String parseList(String parsedLine) {
-        if (parsedLine.startsWith("*")) {
-            String skipAsterisk = parsedLine.substring(2);
-            return "<li>" + skipAsterisk + "</li>";
+        @Override
+        public String parse(String parsedLine) {
+            if (!activeList) {
+                if (isList(parsedLine)) {
+                    activeList = true;
+                    parsedLine = "<ul>" + parsedLine;
+                }
+            } else {
+                activeList = false;
+                parsedLine = parsedLine + "</ul>";
+            }
+            return nextParser(parsedLine);
         }
-        return parsedLine;
-    }
 
-    private String parseParagraph(String parsedLine) {
-        if (!(isHeader(parsedLine) || isList(parsedLine)))
-            return "<p>" + parsedLine + "</p>";
-        return parsedLine;
     }
+    public class ParagraphParser extends TagParser {
 
-    private String parseFontStyles(String parsedLine) {
-        String result = parseBold(parsedLine);
-        return parseItalic(result);
+        @Override
+        public String parse(String parsedLine) {
+            if (!(isHeader(parsedLine) || isList(parsedLine)))
+                parsedLine = "<p>" + parsedLine + "</p>";
+
+            return nextParser(parsedLine);
+        }
+        private boolean isHeader(String parsedLine) {
+            return parsedLine.matches("(<h).*");
+        }
     }
+    public class FontStyleParser extends TagParser {
 
-    private String parseBold(String parsedLine) {
-        String boldFontRegEx = "__(.+)__";
-        String taggedWithStrong = "<strong>$1</strong>";
-        return parsedLine.replaceAll(boldFontRegEx, taggedWithStrong);
+        @Override
+        public String parse(String parsedLine) {
+            return nextParser(parseItalic(parseBold(parsedLine)));
+        }
+
+        private String parseBold(String parsedLine) {
+            String boldFontRegEx = "__(.+)__";
+            String taggedWithStrong = "<strong>$1</strong>";
+            return parsedLine.replaceAll(boldFontRegEx, taggedWithStrong);
+        }
+
+        private String parseItalic(String parsedLine) {
+            String italicFontRegEx = "_(.+)_";
+            String taggedWithEm = "<em>$1</em>";
+            return parsedLine.replaceAll(italicFontRegEx, taggedWithEm);
+        }
+
     }
+    public class HeaderParser extends TagParser {
 
-    private String parseItalic(String parsedLine) {
-        String italicFontRegEx = "_(.+)_";
-        String taggedWithEm = "<em>$1</em>";
-        return parsedLine.replaceAll(italicFontRegEx, taggedWithEm);
+        @Override
+        public String parse(String parsedLine) {
+            int count = 0;
+
+            for (int i = 0; i < parsedLine.length() && parsedLine.charAt(i) == '#'; i++) {
+                count++;
+            }
+
+            if (count != 0) {
+                parsedLine = "<h" + count + ">" + parsedLine.substring(count + 1) + "</h" + count + ">";
+            }
+
+
+            return nextParser(parsedLine);
+        }
+
     }
-
     private boolean isList(String parsedLine) {
         return parsedLine.matches("(<li>).*");
-    }
-
-    private boolean isHeader(String parsedLine) {
-        return parsedLine.matches("(<h).*");
     }
 }
