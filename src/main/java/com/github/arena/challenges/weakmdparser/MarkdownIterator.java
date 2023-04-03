@@ -27,18 +27,20 @@ public class MarkdownIterator implements Iterator {
     @Override
     public Object next() {
         this.currentLine += 1;
-        return parseLine(lines[currentLine]);
+        return parseCurrentLine();
     }
 
-    private String parseLine(String parsedLine) {
-        parsedLine = parseHeader(parsedLine);
-        parsedLine = parseList(parsedLine);
-        parsedLine = parseParagraph(parsedLine);
-        parsedLine = parseListContainer(parsedLine);
-        return parseFontStyles(parsedLine);
+    private String parseCurrentLine() {
+        lines[currentLine] = parseHeader();
+        lines[currentLine] = parseList();
+        lines[currentLine] = parseParagraph();
+        lines[currentLine] = parseListContainer();
+        lines[currentLine] = parseFontStyles();
+        return lines[currentLine];
     }
 
-    private String parseHeader(String parsedLine) {
+    private String parseHeader() {
+        String parsedLine = lines[currentLine];
         int hashCount = countLeadingChars(parsedLine, '#');
         if (hashCount == 0) {
             return parsedLine;
@@ -47,7 +49,8 @@ public class MarkdownIterator implements Iterator {
         return "<h" + hashCount + ">" + skipHashes + "</h" + hashCount + ">";
     }
 
-    private String parseList(String parsedLine) {
+    private String parseList() {
+        String parsedLine = lines[currentLine];
         if (parsedLine.startsWith("*")) {
             String skipAsterisk = parsedLine.substring(2);
             return "<li>" + skipAsterisk + "</li>";
@@ -55,36 +58,48 @@ public class MarkdownIterator implements Iterator {
         return parsedLine;
     }
 
-    private String parseParagraph(String parsedLine) {
+    private String parseParagraph() {
+        String parsedLine = lines[currentLine];
         if (!(isHeader(parsedLine) || isList(parsedLine)))
             return "<p>" + parsedLine + "</p>";
         return parsedLine;
     }
 
-    private String parseListContainer(String parsedLine) {
-        if (!activeList) {
-            if (isList(parsedLine)) {
+    private String parseListContainer() {
+        String parsedLine = lines[currentLine];
+        if (isList(parsedLine)){
+            if (!activeList){
                 activeList = true;
-                return "<ul>" + parsedLine;
+                parsedLine = "<ul>" + parsedLine;
             }
-        } else {
+            if (hasNext()) {
+                if (!isList(lines[currentLine+1])) {
+                    parsedLine = parsedLine + "</ul>";
+                }
+            }else{
+                parsedLine = parsedLine + "</ul>";
+            }
+        } else{
             activeList = false;
-            return parsedLine + "</ul>";
         }
         return parsedLine;
     }
 
-    private String parseFontStyles(String parsedLine) {
-        return parseItalic(parseBold(parsedLine));
+    private String parseFontStyles() {
+        lines[currentLine] = parseBold();
+        lines[currentLine] = parseItalic();
+        return lines[currentLine];
     }
 
-    private String parseBold(String parsedLine) {
+    private String parseBold() {
+        String parsedLine = lines[currentLine];
         String boldFontRegEx = "__(.+)__";
         String taggedWithStrong = "<strong>$1</strong>";
         return parsedLine.replaceAll(boldFontRegEx, taggedWithStrong);
     }
 
-    private String parseItalic(String parsedLine) {
+    private String parseItalic() {
+        String parsedLine = lines[currentLine];
         String italicFontRegEx = "_(.+)_";
         String taggedWithEm = "<em>$1</em>";
         return parsedLine.replaceAll(italicFontRegEx, taggedWithEm);
@@ -99,7 +114,7 @@ public class MarkdownIterator implements Iterator {
     }
 
     private boolean isList(String parsedLine) {
-        return parsedLine.matches("(<li>).*");
+        return parsedLine.matches("(<li>).*") || parsedLine.matches("(\\*).*");
     }
 
     private boolean isHeader(String parsedLine) {
