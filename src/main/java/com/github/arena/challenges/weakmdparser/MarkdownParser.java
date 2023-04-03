@@ -3,7 +3,7 @@ package com.github.arena.challenges.weakmdparser;
 public class MarkdownParser {
     private boolean activeList = false;
 
-    String parse(String parsedString) {
+    public String parse(String parsedString) {
         String[] lines = parsedString.split("\n");
         StringBuilder result = new StringBuilder();
         for (String currentLine : lines) {
