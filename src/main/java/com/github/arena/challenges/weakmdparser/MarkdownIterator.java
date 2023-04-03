@@ -12,6 +12,13 @@ public class MarkdownIterator implements Iterator {
         this.activeList = false;
         this.currentLine = -1;
     }
+
+    public MarkdownIterator(String lines[]) {
+        this.lines = lines;
+        this.activeList = false;
+        this.currentLine = -1;
+    }
+
     @Override
     public boolean hasNext() {
         return this.currentLine < this.lines.length - 1;
