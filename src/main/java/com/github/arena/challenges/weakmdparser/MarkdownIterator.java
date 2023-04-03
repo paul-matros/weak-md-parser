@@ -1,8 +1,9 @@
 package com.github.arena.challenges.weakmdparser;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
-public class MarkdownIterator implements Iterator {
+public class MarkdownIterator implements Iterator<String> {
     private final String[] lines;
     private boolean activeList;
     private int currentLine;
@@ -13,7 +14,7 @@ public class MarkdownIterator implements Iterator {
         this.currentLine = -1;
     }
 
-    public MarkdownIterator(String lines[]) {
+    public MarkdownIterator(String[] lines) {
         this.lines = lines;
         this.activeList = false;
         this.currentLine = -1;
@@ -25,84 +26,82 @@ public class MarkdownIterator implements Iterator {
     }
 
     @Override
-    public Object next() {
+    public String next() throws NoSuchElementException{
+        if (!hasNext()){
+            throw new NoSuchElementException();
+        }
         this.currentLine += 1;
-        return parseCurrentLine();
-    }
-
-    private String parseCurrentLine() {
-        lines[currentLine] = parseHeader();
-        lines[currentLine] = parseList();
-        lines[currentLine] = parseParagraph();
-        lines[currentLine] = parseListContainer();
-        lines[currentLine] = parseFontStyles();
+        parseCurrentLine();
         return lines[currentLine];
     }
 
-    private String parseHeader() {
-        String parsedLine = lines[currentLine];
-        int hashCount = countLeadingChars(parsedLine, '#');
-        if (hashCount == 0) {
-            return parsedLine;
-        }
-        String skipHashes = parsedLine.substring(hashCount + 1);
-        return "<h" + hashCount + ">" + skipHashes + "</h" + hashCount + ">";
+    private void parseCurrentLine() {
+        parseHeader();
+        parseList();
+        parseParagraph();
+        parseListContainer();
+        parseFontStyles();
     }
 
-    private String parseList() {
+    private void parseHeader() {
+        String parsedLine = lines[currentLine];
+        int hashCount = countLeadingChars(lines[currentLine], '#');
+        if (hashCount == 0) {
+            return;
+        }
+        String skipHashes = parsedLine.substring(hashCount + 1);
+        lines[currentLine] = "<h" + hashCount + ">" + skipHashes + "</h" + hashCount + ">";
+    }
+
+    private void parseList() {
         String parsedLine = lines[currentLine];
         if (parsedLine.startsWith("*")) {
             String skipAsterisk = parsedLine.substring(2);
-            return "<li>" + skipAsterisk + "</li>";
+            lines[currentLine] = "<li>" + skipAsterisk + "</li>";
         }
-        return parsedLine;
     }
 
-    private String parseParagraph() {
+    private void parseParagraph() {
         String parsedLine = lines[currentLine];
-        if (!(isHeader(parsedLine) || isList(parsedLine)))
-            return "<p>" + parsedLine + "</p>";
-        return parsedLine;
+        if (!(isHeader(parsedLine) || isList(parsedLine))){
+            lines[currentLine] = "<p>" + parsedLine + "</p>";
+        }
     }
 
-    private String parseListContainer() {
+    private void parseListContainer() {
         String parsedLine = lines[currentLine];
         if (isList(parsedLine)){
             if (!activeList){
                 activeList = true;
-                parsedLine = "<ul>" + parsedLine;
+                lines[currentLine] = "<ul>" + parsedLine;
             }
             if (hasNext()) {
                 if (!isList(lines[currentLine+1])) {
-                    parsedLine = parsedLine + "</ul>";
+                    lines[currentLine] = parsedLine + "</ul>";
                 }
             }else{
-                parsedLine = parsedLine + "</ul>";
+                lines[currentLine] = parsedLine + "</ul>";
             }
         } else{
             activeList = false;
         }
-        return parsedLine;
     }
 
-    private String parseFontStyles() {
-        lines[currentLine] = parseBold();
-        lines[currentLine] = parseItalic();
-        return lines[currentLine];
+    private void parseFontStyles() {
+        parseBold();
+        parseItalic();
     }
 
-    private String parseBold() {
-        String parsedLine = lines[currentLine];
+    private void parseBold() {
         String boldFontRegEx = "__(.+)__";
         String taggedWithStrong = "<strong>$1</strong>";
-        return parsedLine.replaceAll(boldFontRegEx, taggedWithStrong);
+        lines[currentLine] = lines[currentLine].replaceAll(boldFontRegEx, taggedWithStrong);
     }
 
-    private String parseItalic() {
-        String parsedLine = lines[currentLine];
+    private void parseItalic() {
         String italicFontRegEx = "_(.+)_";
         String taggedWithEm = "<em>$1</em>";
-        return parsedLine.replaceAll(italicFontRegEx, taggedWithEm);
+        lines[currentLine] = lines[currentLine].replaceAll(italicFontRegEx, taggedWithEm);
     }
 
     private int countLeadingChars(String string, char character) {
